@@ -1,0 +1,10 @@
+venv/
+mlruns/
+logs/
+MLOPS_PROJECT_1.egg-info/
+*.pkl
+*.csv
+*.pyc
+secrets/
+artifacts/
+build/
