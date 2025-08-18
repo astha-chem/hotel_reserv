@@ -20,9 +20,11 @@ COPY . .
 # Install the package in editable mode
 RUN pip install --no-cache-dir -e .
 
-COPY gcp_key.json /app/gcp_key.json
+ARG GCP_KEY
+ENV GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+COPY $GCP_KEY /tmp/gcp-key.json
 
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/gcp_key.json"
+RUN python pipeline/training_pipeline.py
 
 # Train the model before running the application
 RUN python pipeline/training_pipeline.py
