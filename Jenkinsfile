@@ -39,7 +39,7 @@ pipeline{
                         sh '''
                         export PATH=$PATH:${GCLOUD_PATH}
                         gcloud auth activate-service-account --key-file=${GCP_APPL_CRED}
-                        gcloud config set project=${GCP_PROJECT}
+                        gcloud config set project ${GCP_PROJECT}
                         gcloud auth configure-docker --quiet 
 
                         docker build -t gcr.io/${GCP_PROJECT}/hotel-reserv:latest .
