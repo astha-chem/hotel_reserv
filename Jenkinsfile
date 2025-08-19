@@ -5,6 +5,7 @@ pipeline{
         VENV_DIR = 'myvenv'
         GCP_PROJECT= 'mlops-468305'
         GCLOUD_PATH = '/var/jenkins_home/google-cloud-sdk/bin'
+        DOCKER_CLI_EXPERIMENTAL='enabled'
     }
 
     stages{
@@ -13,6 +14,22 @@ pipeline{
                 script{
                     echo 'Cloning Github repo to Jenkins....'
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/astha-chem/hotel_reserv.git']])
+                }
+            }
+        }
+
+        stage('Set up Docker Buildx') {
+            steps {
+                script{
+                    echo 'Setting up Docker Buildx...'
+                    sh ''' 
+                    # Make sure buildx is available
+                    docker buildx version || true
+
+                    # Create a builder if not already there
+                    docker buildx create --name mybuilder --use || docker buildx use mybuilder
+                    docker buildx inspect --bootstrap
+                    '''
                 }
             }
         }
@@ -45,7 +62,6 @@ pipeline{
                         -t gcr.io/${GCP_PROJECT}/hotel-reserv:latest \
                         --push .
                         '''
-
                     }
                 }
             }
