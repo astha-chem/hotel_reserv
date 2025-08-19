@@ -84,7 +84,7 @@ pipeline{
                             --platform=managed \
                             --region=us-central1 \
                             --allow-unauthenticated
-                            
+                            --timeout=10m
                         '''
                     }
                 }
