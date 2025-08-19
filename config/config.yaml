@@ -26,3 +26,7 @@ data_processing:
     - no_of_special_requests
   skewness_threshold : 5
   no_of_features : 10
+
+model_training:
+  bucket_name : "my_bucket_9790"
+  model_file_name : "final_model.pkl"

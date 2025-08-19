@@ -20,14 +20,9 @@ COPY . .
 # Install the package in editable mode
 RUN pip install --no-cache-dir -e .
 
-ARG GCP_KEY
-ENV GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
-COPY $GCP_KEY /tmp/gcp-key.json
 
 RUN python pipeline/training_pipeline.py
 
-# Train the model before running the application
-RUN python pipeline/training_pipeline.py
 
 # Expose the port that Flask will run on
 EXPOSE 5000

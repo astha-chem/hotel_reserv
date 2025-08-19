@@ -18,5 +18,5 @@ if __name__=="__main__":
 
     ### 3. Model Training
 
-    trainer = ModelTraining(PROCESSED_TRAIN_DATA_PATH,PROCESSED_TEST_DATA_PATH,MODEL_OUTPUT_PATH)
+    trainer = ModelTraining(PROCESSED_TRAIN_DATA_PATH,PROCESSED_TEST_DATA_PATH,MODEL_OUTPUT_PATH, read_yaml(CONFIG_PATH))
     trainer.run()

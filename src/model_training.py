@@ -10,6 +10,7 @@ from config.paths_config import *
 from config.model_params import *
 from utils.common_functions import read_yaml,load_data
 from scipy.stats import randint
+from google.cloud import storage
 
 import mlflow
 import mlflow.sklearn
@@ -18,13 +19,16 @@ logger = get_logger(__name__)
 
 class ModelTraining:
 
-    def __init__(self,train_path,test_path,model_output_path):
+    def __init__(self,train_path,test_path,model_output_path,config):
         self.train_path = train_path
         self.test_path = test_path
         self.model_output_path = model_output_path
 
         self.params_dist = LIGHTGM_PARAMS
         self.random_search_params = RANDOM_SEARCH_PARAMS
+
+        self.config = config["model_training"]
+        self.bucket_name = self.config["bucket_name"]
 
     def load_and_split_data(self):
         try:
@@ -120,6 +124,18 @@ class ModelTraining:
         except Exception as e:
             logger.error(f"Error while saving model {e}")
             raise CustomException("Failed to save model" ,  e)
+
+    def save_model_to_gcs(self): 
+        # Upload to GCS
+        bucket_name = self.bucket_name
+        destination_blob_name = self.model_output_path 
+        local_model_path = self.model_output_path
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
+        blob.upload_from_filename(local_model_path)
+
+        print(f"Model uploaded to gs://{bucket_name}/{destination_blob_name}")
     
     def run(self):
         try:
@@ -136,7 +152,7 @@ class ModelTraining:
                 best_lgbm_model = self.train_lgbm(X_train,y_train)
                 metrics = self.evaluate_model(best_lgbm_model ,X_test , y_test)
                 self.save_model(best_lgbm_model)
-
+                # self.save_model_to_gcs()
                 logger.info("Logging the model into MLFLOW")
                 mlflow.log_artifact(self.model_output_path)
 
@@ -151,8 +167,9 @@ class ModelTraining:
             raise CustomException("Failed during model training pipeline" ,  e)
         
 if __name__=="__main__":
-    trainer = ModelTraining(PROCESSED_TRAIN_DATA_PATH,PROCESSED_TEST_DATA_PATH,MODEL_OUTPUT_PATH)
+    trainer = ModelTraining(PROCESSED_TRAIN_DATA_PATH,PROCESSED_TEST_DATA_PATH,MODEL_OUTPUT_PATH,read_yaml(CONFIG_PATH))
     trainer.run()
+    # trainer.save_model_to_gcs()
 
     
 
